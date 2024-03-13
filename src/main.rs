@@ -3,16 +3,21 @@ use std::{fs::File, process};
 use clap::Parser;
 use fm_scouter::player::Player;
 
-fn parse_csv(current_squad_file: File) -> Result<(), csv::Error> {
+fn parse_csv(current_squad_file: File) -> Result<Vec<Player>, csv::Error> {
     let mut rdr = csv::Reader::from_reader(current_squad_file);
-    let players: Vec<Player> = rdr
+
+    let players = rdr
         .deserialize()
         .map(|result: Result<Player, csv::Error>| {
             result.expect("failed to deserialise players into player structs")
         })
         .collect::<Vec<Player>>();
-    println!("{:?}", players);
-    Ok(())
+
+    for player in &players {
+        println!("{}", player.calculate_score())
+    }
+
+    Ok(players)
 }
 
 #[derive(Parser, Debug)]

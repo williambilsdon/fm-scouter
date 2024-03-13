@@ -1,6 +1,7 @@
-use serde::Deserialize;
+use fm_scouter_derive::SumAttrs;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Player {
     #[serde(rename(deserialize = "Name"))]
     name: String,
@@ -12,102 +13,108 @@ pub struct Player {
     attributes: Attributes,
 }
 
-#[derive(Debug, Deserialize)]
+impl Player {
+    pub fn calculate_score(&self) -> u64 {
+        self.attributes.sum_attrs()
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, SumAttrs)]
 struct Attributes {
     #[serde(rename(deserialize = "Wor"))]
-    workrate: u8,
+    workrate: u64,
     #[serde(rename(deserialize = "Vis"))]
-    vision: u8,
+    vision: u64,
     #[serde(rename(deserialize = "Thr"))]
-    throwing: u8,
+    throwing: u64,
     #[serde(rename(deserialize = "Tec"))]
-    technique: u8,
+    technique: u64,
     #[serde(rename(deserialize = "Tea"))]
-    teamwork: u8,
+    teamwork: u64,
     #[serde(rename(deserialize = "Tck"))]
-    tackling: u8,
+    tackling: u64,
     #[serde(rename(deserialize = "Str"))]
-    strength: u8,
+    strength: u64,
     #[serde(rename(deserialize = "Sta"))]
-    stamina: u8,
+    stamina: u64,
     #[serde(rename(deserialize = "TRO"))]
-    rushing_out: u8,
+    rushing_out: u64,
     #[serde(rename(deserialize = "Ref"))]
-    reflexes: u8,
+    reflexes: u64,
     #[serde(rename(deserialize = "Pun"))]
-    punching: u8,
+    punching: u64,
     #[serde(rename(deserialize = "Pos"))]
-    positioning: u8,
+    positioning: u64,
     #[serde(rename(deserialize = "Pen"))]
-    penalties: u8,
+    penalties: u64,
     #[serde(rename(deserialize = "Pas"))]
-    passing: u8,
+    passing: u64,
     #[serde(rename(deserialize = "Pac"))]
-    pace: u8,
+    pace: u64,
     #[serde(rename(deserialize = "1v1"))]
-    one_vs_one: u8,
+    one_vs_one: u64,
     #[serde(rename(deserialize = "OtB"))]
-    off_the_ball: u8,
+    off_the_ball: u64,
     #[serde(rename(deserialize = "Nat"))]
-    natural_fitness: u8,
+    natural_fitness: u64,
     #[serde(rename(deserialize = "Mar"))]
-    marking: u8,
+    marking: u64,
     #[serde(rename(deserialize = "L Th"))]
-    long_throws: u8,
+    long_throws: u64,
     #[serde(rename(deserialize = "Lon"))]
-    long_shots: u8,
+    long_shots: u64,
     #[serde(rename(deserialize = "Ldr"))]
-    leadership: u8,
+    leadership: u64,
     #[serde(rename(deserialize = "Kic"))]
-    kicking: u8,
+    kicking: u64,
     #[serde(rename(deserialize = "Jum"))]
-    jumping: u8,
+    jumping: u64,
     #[serde(rename(deserialize = "Hea"))]
-    heading: u8,
+    heading: u64,
     #[serde(rename(deserialize = "Han"))]
-    handling: u8,
+    handling: u64,
     #[serde(rename(deserialize = "Fre"))]
-    free_kicks: u8,
+    free_kicks: u64,
     #[serde(rename(deserialize = "Fla"))]
-    flair: u8,
+    flair: u64,
     #[serde(rename(deserialize = "Fir"))]
-    first_touch: u8,
+    first_touch: u64,
     #[serde(rename(deserialize = "Fin"))]
-    finishing: u8,
+    finishing: u64,
     #[serde(rename(deserialize = "Ecc"))]
-    eccentricity: u8,
+    eccentricity: u64,
     #[serde(rename(deserialize = "Dri"))]
-    dribbling: u8,
+    dribbling: u64,
     #[serde(rename(deserialize = "Det"))]
-    determination: u8,
+    determination: u64,
     #[serde(rename(deserialize = "Dec"))]
-    decision_making: u8,
+    decision_making: u64,
     #[serde(rename(deserialize = "Cro"))]
-    crossing: u8,
+    crossing: u64,
     #[serde(rename(deserialize = "Cor"))]
-    corners: u8,
+    corners: u64,
     #[serde(rename(deserialize = "Age"))]
-    age: u8,
+    age: u64,
     #[serde(rename(deserialize = "Cnt"))]
-    concentration: u8,
+    concentration: u64,
     #[serde(rename(deserialize = "Cmp"))]
-    composure: u8,
+    composure: u64,
     #[serde(rename(deserialize = "Com"))]
-    communication: u8,
+    communication: u64,
     #[serde(rename(deserialize = "Cmd"))]
-    command_of_area: u8,
+    command_of_area: u64,
     #[serde(rename(deserialize = "Bra"))]
-    bravery: u8,
+    bravery: u64,
     #[serde(rename(deserialize = "Bal"))]
-    balance: u8,
+    balance: u64,
     #[serde(rename(deserialize = "Ant"))]
-    anticipation: u8,
+    anticipation: u64,
     #[serde(rename(deserialize = "Agi"))]
-    agility: u8,
+    agility: u64,
     #[serde(rename(deserialize = "Agg"))]
-    aggression: u8,
+    aggression: u64,
     #[serde(rename(deserialize = "Aer"))]
-    aerial: u8,
+    aerial: u64,
     #[serde(rename(deserialize = "Acc"))]
-    acceleration: u8,
+    acceleration: u64,
 }
