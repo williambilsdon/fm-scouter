@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Player {
     #[serde(rename(deserialize = "Name"))]
-    name: String,
+    pub name: String,
     #[serde(rename(deserialize = "Inf"))]
     info: Option<String>,
     #[serde(rename(deserialize = "Position"))]

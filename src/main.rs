@@ -1,9 +1,9 @@
 use std::{fs::File, process};
 
 use clap::Parser;
-use fm_scouter::player::Player;
+use fm_scouter::player::{Attributes, Player};
 
-fn parse_csv(current_squad_file: File) -> Result<Vec<Player>, csv::Error> {
+fn parse_csv(current_squad_file: File, weights: Attributes) -> Result<Vec<Player>, csv::Error> {
     let mut rdr = csv::Reader::from_reader(current_squad_file);
 
     let mut players = rdr
@@ -14,7 +14,11 @@ fn parse_csv(current_squad_file: File) -> Result<Vec<Player>, csv::Error> {
         .collect::<Vec<Player>>();
 
     for player in &mut players {
-        println!("{:?}", player)
+        println!(
+            "{}: {:?}",
+            player.name.clone(),
+            player.calculate_score(&weights)
+        )
     }
 
     Ok(players)
@@ -31,7 +35,10 @@ fn main() {
 
     let current_squad_file = File::open(args.current_squad_file_path).unwrap();
 
-    if let Err(err) = parse_csv(current_squad_file) {
+    let weights_file = File::open("./weights/advanced_forward.json").unwrap();
+    let weights: Attributes = serde_json::from_reader(weights_file).unwrap();
+
+    if let Err(err) = parse_csv(current_squad_file, weights) {
         println!("error parsing current squad csv: {}", err);
         process::exit(1);
     }
