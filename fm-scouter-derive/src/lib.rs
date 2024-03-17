@@ -4,34 +4,22 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
 
-#[proc_macro_derive(CalcAttrs)]
-pub fn sum_attrs(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(ApplyWeights)]
+pub fn apply_weights(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
-
     let struct_name = &input.ident;
-
-    let fields_sum = match &input.data {
+    let mut fields_len: usize = 0;
+    let apply_weights = match &input.data {
         Data::Struct(data_struct) => match &data_struct.fields {
             Fields::Named(fields) => {
-                let field_names = fields.named.iter().map(|field| &field.ident);
-                quote! {
-                    #(self.#field_names)+*
-                }
-            }
-            _ => panic!("sum_attrs macro only works with named fields"),
-        },
-        _ => {
-            panic!("sum_attrs macro only works with structs");
-        }
-    };
+                fields_len = fields.named.len();
+                let weighted_values = fields.named.iter().map(|field| {
+                    let field_name = &field.ident;
+                    quote! { self.#field_name * weights.#field_name / 100 }
+                });
 
-    let apply_attributes = match &input.data {
-        Data::Struct(data_struct) => match &data_struct.fields {
-            Fields::Named(fields) => {
-                let field_names = fields.named.iter().map(|field| &field.ident);
                 quote! {
-                    #(self.#field_names *= weights.#field_names;)*
-
+                    [#(#weighted_values),*]
                 }
             }
             _ => panic!("apply_weights macro only works with named fields"),
@@ -43,12 +31,9 @@ pub fn sum_attrs(input: TokenStream) -> TokenStream {
 
     let expanded = quote! {
         impl #struct_name {
-            fn sum_attrs(&self) -> u64 {
-                #fields_sum
-            }
-
-            fn apply_weights(&mut self, weights: &#struct_name) -> () {
-                #apply_attributes
+            fn apply_weights(&mut self, weights: &#struct_name) -> [u64; #fields_len] {
+                let weighted_values = #apply_weights;
+                weighted_values
             }
         }
     };
