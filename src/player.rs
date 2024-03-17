@@ -1,4 +1,4 @@
-use fm_scouter_derive::SumAttrs;
+use fm_scouter_derive::CalcAttrs;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -14,13 +14,17 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn calculate_score(&self) -> u64 {
+    pub fn calculate_score(&mut self, weights: &Attributes) -> u64 {
+        self.attributes.apply_weights(weights);
+        // to be honest I hate this, replacing this with a proc function that takes a reference to two attributes might make more sense
+        // Then we can return that in a vec of values and sum that for the calculated score. For each player we can then take their calculated score
+        // name and pos and return that in some vec of tuples or something simple
         self.attributes.sum_attrs()
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, SumAttrs)]
-struct Attributes {
+#[derive(Debug, Deserialize, Serialize, CalcAttrs)]
+pub struct Attributes {
     #[serde(rename(deserialize = "Wor"))]
     workrate: u64,
     #[serde(rename(deserialize = "Vis"))]

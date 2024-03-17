@@ -6,15 +6,15 @@ use fm_scouter::player::Player;
 fn parse_csv(current_squad_file: File) -> Result<Vec<Player>, csv::Error> {
     let mut rdr = csv::Reader::from_reader(current_squad_file);
 
-    let players = rdr
+    let mut players = rdr
         .deserialize()
         .map(|result: Result<Player, csv::Error>| {
             result.expect("failed to deserialise players into player structs")
         })
         .collect::<Vec<Player>>();
 
-    for player in &players {
-        println!("{}", player.calculate_score())
+    for player in &mut players {
+        println!("{:?}", player)
     }
 
     Ok(players)
