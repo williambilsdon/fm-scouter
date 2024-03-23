@@ -15,7 +15,15 @@ pub struct Player {
 
 impl Player {
     pub fn calculate_score(&mut self, weights: &Attributes) -> u64 {
-        self.attributes.apply_weights(weights).into_iter().sum()
+        let hdrs = ["Wor","Vis","Thr","Tec","Tea","Tck","Str","Sta","TRO","Ref","Pun","Pos","Pen","Pas","Pac","1v1","OtB","Nat","Mar","L Th","Lon","Ldr","Kic","Jum","Hea","Han","Fre","Fla","Fir","Fin","Ecc","Dri","Det","Dec","Cro","Cor","Age","Cnt","Cmp","Com","Cmd","Bra","Bal","Ant","Agi","Agg","Aer","Acc"];
+        let post_weight_values = self.attributes.apply_weights(weights);
+        let zipped: Vec<(String, u64)> = hdrs.iter().map(|str| str.to_string()).zip(post_weight_values).collect();
+        // Used for debugging weights
+        // println!("{}", self.name);
+        // for (hdr, val) in zipped {
+        //     println!("{}: {}", hdr, val)
+        // }
+        post_weight_values.into_iter().sum()
     }
 }
 
