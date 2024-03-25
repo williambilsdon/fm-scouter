@@ -6,9 +6,7 @@ use std::{
 
 use csv::StringRecord;
 
-use self::attribute::Attribute;
-
-pub mod attribute;
+use crate::attribute::Attribute;
 
 #[derive(Debug)]
 pub struct Player {
