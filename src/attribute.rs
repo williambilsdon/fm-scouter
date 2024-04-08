@@ -1,100 +1,56 @@
-use serde::Deserialize;
+use serde::{
+    de::{Error, Visitor},
+    Deserialize, Deserializer,
+};
 
 #[derive(Debug, Deserialize)]
 pub enum Attribute {
-    #[serde(rename(deserialize = "Wor"))]
     Workrate(u8),
-    #[serde(rename(deserialize = "Vis"))]
     Vision(u8),
-    #[serde(rename(deserialize = "Thr"))]
     Throwing(u8),
-    #[serde(rename(deserialize = "Tec"))]
     Technique(u8),
-    #[serde(rename(deserialize = "Tea"))]
     Teamwork(u8),
-    #[serde(rename(deserialize = "Tck"))]
     Tackling(u8),
-    #[serde(rename(deserialize = "Str"))]
     Strength(u8),
-    #[serde(rename(deserialize = "Sta"))]
     Stamina(u8),
-    #[serde(rename(deserialize = "TRO"))]
     RushingOut(u8),
-    #[serde(rename(deserialize = "Ref"))]
     Reflexes(u8),
-    #[serde(rename(deserialize = "Pun"))]
     Punching(u8),
-    #[serde(rename(deserialize = "Pos"))]
     Positioning(u8),
-    #[serde(rename(deserialize = "Pen"))]
     Penalties(u8),
-    #[serde(rename(deserialize = "Pas"))]
     Passing(u8),
-    #[serde(rename(deserialize = "Pac"))]
     Pace(u8),
-    #[serde(rename(deserialize = "1v1"))]
     OneVsOne(u8),
-    #[serde(rename(deserialize = "OtB"))]
     OffTheBall(u8),
-    #[serde(rename(deserialize = "Nat"))]
     NaturalFitness(u8),
-    #[serde(rename(deserialize = "Mar"))]
     Marking(u8),
-    #[serde(rename(deserialize = "L Th"))]
     LongThrows(u8),
-    #[serde(rename(deserialize = "Lon"))]
     LongShots(u8),
-    #[serde(rename(deserialize = "Ldr"))]
     Leadership(u8),
-    #[serde(rename(deserialize = "Kic"))]
     Kicking(u8),
-    #[serde(rename(deserialize = "Jum"))]
     Jumping(u8),
-    #[serde(rename(deserialize = "Hea"))]
     Heading(u8),
-    #[serde(rename(deserialize = "Han"))]
     Handling(u8),
-    #[serde(rename(deserialize = "Fre"))]
     FreeKicks(u8),
-    #[serde(rename(deserialize = "Fla"))]
     Flair(u8),
-    #[serde(rename(deserialize = "Fir"))]
     FirstTouch(u8),
-    #[serde(rename(deserialize = "Fin"))]
     Finishing(u8),
-    #[serde(rename(deserialize = "Ecc"))]
     Eccentricity(u8),
-    #[serde(rename(deserialize = "Dri"))]
     Dribbling(u8),
-    #[serde(rename(deserialize = "Det"))]
     Determination(u8),
-    #[serde(rename(deserialize = "Dec"))]
     DecisionMaking(u8),
-    #[serde(rename(deserialize = "Cro"))]
     Crossing(u8),
-    #[serde(rename(deserialize = "Cor"))]
     Corners(u8),
-    #[serde(rename(deserialize = "Cnt"))]
     Concentration(u8),
-    #[serde(rename(deserialize = "Cmp"))]
     Composure(u8),
-    #[serde(rename(deserialize = "Com"))]
     Communication(u8),
-    #[serde(rename(deserialize = "Cmd"))]
     CommandOfArea(u8),
-    #[serde(rename(deserialize = "Bra"))]
     Bravery(u8),
-    #[serde(rename(deserialize = "Bal"))]
     Balance(u8),
-    #[serde(rename(deserialize = "Ant"))]
     Anticipation(u8),
-    #[serde(rename(deserialize = "Agi"))]
     Agility(u8),
-    #[serde(rename(deserialize = "Agg"))]
     Aggression(u8),
-    #[serde(rename(deserialize = "Aer"))]
     Aerial(u8),
-    #[serde(rename(deserialize = "Acc"))]
     Acceleration(u8),
 }
 
@@ -151,4 +107,41 @@ impl Attribute {
             _ => panic!("Key here should match: {}", key),
         }
     }
+}
+
+// TODO: This is an annoying wrapper struct I seem to need in order to deserialise the weights properly
+// Would be great to spend more time to get rid of this but for now will just carry on.
+#[derive(Debug, Deserialize)]
+pub struct Weights {
+    #[serde(deserialize_with = "deserialise_attr_vec")]
+    pub weights: Vec<Attribute>,
+}
+
+pub fn deserialise_attr_vec<'de, D>(deserializer: D) -> Result<Vec<Attribute>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    struct AttributeVisitor;
+
+    impl<'de> Visitor<'de> for AttributeVisitor {
+        type Value = Vec<Attribute>;
+
+        fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            formatter.write_str("expecting map of key values pairs where the key is an attribute header and value is attribute value as u8")
+        }
+
+        fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+        where
+            A: serde::de::MapAccess<'de>,
+        {
+            let mut result = vec![];
+            while let Some((key, value)) = map.next_entry()? {
+                result.push(self::Attribute::from_key_value(key, value))
+            }
+
+            Ok(result)
+        }
+    }
+
+    deserializer.deserialize_map(AttributeVisitor)
 }

@@ -1,4 +1,5 @@
 use crate::player::{Player, PlayerError};
+use attribute::{Attribute, Weights};
 use csv::StringRecord;
 use std::{error::Error, fs::File};
 
@@ -19,4 +20,9 @@ pub fn parse_csv(csv_file: File) -> Result<Vec<Player>, Box<dyn Error>> {
         .collect::<Result<Vec<Player>, PlayerError>>()?;
 
     Ok(players)
+}
+
+pub fn parse_weights(weight_file: &str) -> Result<Vec<Attribute>, Box<dyn Error>> {
+    let weights: Weights = serde_json::from_str(weight_file)?;
+    Ok(weights.weights)
 }

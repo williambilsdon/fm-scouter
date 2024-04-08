@@ -1,7 +1,11 @@
-use std::fs::File;
+use std::{
+    error::Error,
+    fs::{read_to_string, File},
+    path::Path,
+};
 
 use clap::Parser;
-use fm_scouter::parse_csv;
+use fm_scouter::{parse_csv, parse_weights};
 
 #[derive(Parser, Debug)]
 #[command(version, about)]
@@ -12,14 +16,25 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    let current_squad_file = File::open(args.current_squad_file_path).unwrap();
-
-    // let weights_file = File::open("./weights/advanced_forward.json").unwrap();
-    // let weights: Vec<Attributes> = serde_json::from_reader(weights_file).unwrap();
-
-    let players = parse_csv(current_squad_file).unwrap();
-
-    for player in players {
-        println!("Name: {:?}", player)
+    if let Err(err) = app(args) {
+        println!("{}", err);
+        std::process::exit(1)
+    } else {
+        std::process::exit(0)
     }
+}
+
+fn app(args: Args) -> Result<(), Box<dyn Error>> {
+    let current_squad_file = File::open(args.current_squad_file_path)?;
+
+    let players = parse_csv(current_squad_file)?;
+
+    println!("Parsed Players");
+
+    let weights_string = read_to_string(Path::new("./weights/advanced_forward.json"))?;
+    let weights = parse_weights(weights_string.as_str())?;
+
+    println!("Parsed Weights");
+
+    Ok(())
 }
