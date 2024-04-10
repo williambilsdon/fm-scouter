@@ -1,7 +1,4 @@
-use serde::{
-    de::{Error, Visitor},
-    Deserialize, Deserializer,
-};
+use serde::{de::Visitor, Deserialize, Deserializer};
 
 #[derive(Debug, Deserialize)]
 pub enum Attribute {
@@ -105,6 +102,58 @@ impl Attribute {
             "Aer" => Attribute::Aerial(value),
             "Acc" => Attribute::Acceleration(value),
             _ => panic!("Key here should match: {}", key),
+        }
+    }
+
+    pub fn get_value(&self) -> &u8 {
+        match self {
+            Attribute::Workrate(v) => v,
+            Attribute::Vision(v) => v,
+            Attribute::Throwing(v) => v,
+            Attribute::Technique(v) => v,
+            Attribute::Teamwork(v) => v,
+            Attribute::Tackling(v) => v,
+            Attribute::Strength(v) => v,
+            Attribute::Stamina(v) => v,
+            Attribute::RushingOut(v) => v,
+            Attribute::Reflexes(v) => v,
+            Attribute::Punching(v) => v,
+            Attribute::Positioning(v) => v,
+            Attribute::Penalties(v) => v,
+            Attribute::Passing(v) => v,
+            Attribute::Pace(v) => v,
+            Attribute::OneVsOne(v) => v,
+            Attribute::OffTheBall(v) => v,
+            Attribute::NaturalFitness(v) => v,
+            Attribute::Marking(v) => v,
+            Attribute::LongThrows(v) => v,
+            Attribute::LongShots(v) => v,
+            Attribute::Leadership(v) => v,
+            Attribute::Kicking(v) => v,
+            Attribute::Jumping(v) => v,
+            Attribute::Heading(v) => v,
+            Attribute::Handling(v) => v,
+            Attribute::FreeKicks(v) => v,
+            Attribute::Flair(v) => v,
+            Attribute::FirstTouch(v) => v,
+            Attribute::Finishing(v) => v,
+            Attribute::Eccentricity(v) => v,
+            Attribute::Dribbling(v) => v,
+            Attribute::Determination(v) => v,
+            Attribute::DecisionMaking(v) => v,
+            Attribute::Crossing(v) => v,
+            Attribute::Corners(v) => v,
+            Attribute::Concentration(v) => v,
+            Attribute::Composure(v) => v,
+            Attribute::Communication(v) => v,
+            Attribute::CommandOfArea(v) => v,
+            Attribute::Bravery(v) => v,
+            Attribute::Balance(v) => v,
+            Attribute::Anticipation(v) => v,
+            Attribute::Agility(v) => v,
+            Attribute::Aggression(v) => v,
+            Attribute::Aerial(v) => v,
+            Attribute::Acceleration(v) => v,
         }
     }
 }

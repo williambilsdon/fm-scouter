@@ -1,6 +1,8 @@
 use std::{
+    any::Any,
     error::Error,
     fmt::{Debug, Display},
+    mem::discriminant,
     num::ParseIntError,
 };
 
@@ -15,11 +17,29 @@ pub struct Player {
     position: String,
     age: u8,
     pub attributes: Vec<Attribute>,
+    pub score: Option<u64>,
 }
 
 impl Player {
     pub fn calculate_score(&mut self, weights: &Vec<Attribute>) -> u64 {
-        unimplemented!()
+        let score = self
+            .attributes
+            .iter()
+            .map(|attr| {
+                let attr_val: u64 = attr.get_value().to_owned().into();
+                let weight_val: u64 = weights.iter().fold(0, |_, weight| {
+                    if discriminant(attr) == discriminant(weight) {
+                        weight.get_value().to_owned().into()
+                    } else {
+                        0
+                    }
+                });
+                attr_val * weight_val
+            })
+            .sum();
+
+        self.score = Some(score);
+        score
     }
 
     pub fn from_string_record(
@@ -57,7 +77,17 @@ impl Player {
             position,
             age,
             attributes,
+            score: None,
         })
+    }
+}
+
+impl Display for Player {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self.score {
+            Some(score_value) => writeln!(f, "Player: {}, Score: {}", self.name, score_value),
+            None => writeln!(f, "Player: {} has no score calculated", self.name),
+        }
     }
 }
 
@@ -86,5 +116,64 @@ impl Error for PlayerError {
 
     fn cause(&self) -> Option<&dyn Error> {
         self.source()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{attribute::Attribute, player::Player};
+
+    #[test]
+    fn calculate_score_sums_correctly() {
+        let mut player = Player {
+            name: String::new(),
+            info: None,
+            position: String::new(),
+            age: 0,
+            attributes: vec![Attribute::Heading(10)],
+            score: None,
+        };
+
+        let weights = vec![Attribute::Heading(10)];
+
+        let result = player.calculate_score(&weights);
+        assert_eq!(result, 100);
+        assert_eq!(player.score, Some(100))
+    }
+
+    #[test]
+    fn calculate_score_sums_mismatched_weight_correctly() {
+        let mut player = Player {
+            name: String::new(),
+            info: None,
+            position: String::new(),
+            age: 0,
+            attributes: vec![Attribute::Heading(10)],
+            score: None,
+        };
+
+        let weights = vec![Attribute::Finishing(10)];
+
+        let result = player.calculate_score(&weights);
+        assert_eq!(result, 0);
+        assert_eq!(player.score, Some(0))
+    }
+
+    #[test]
+    fn calculate_score_sums_no_weights_correctly() {
+        let mut player = Player {
+            name: String::new(),
+            info: None,
+            position: String::new(),
+            age: 0,
+            attributes: vec![Attribute::Heading(10)],
+            score: None,
+        };
+
+        let weights = Vec::new();
+
+        let result = player.calculate_score(&weights);
+        assert_eq!(result, 0);
+        assert_eq!(player.score, Some(0))
     }
 }

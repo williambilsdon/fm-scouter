@@ -5,7 +5,10 @@ use std::{
 };
 
 use clap::Parser;
-use fm_scouter::{parse_csv, parse_weights};
+use fm_scouter::{
+    parse_csv, parse_weights,
+    player::{self, Player},
+};
 
 #[derive(Parser, Debug)]
 #[command(version, about)]
@@ -27,7 +30,7 @@ fn main() {
 fn app(args: Args) -> Result<(), Box<dyn Error>> {
     let current_squad_file = File::open(args.current_squad_file_path)?;
 
-    let players = parse_csv(current_squad_file)?;
+    let mut players = parse_csv(current_squad_file)?;
 
     println!("Parsed Players");
 
@@ -35,6 +38,11 @@ fn app(args: Args) -> Result<(), Box<dyn Error>> {
     let weights = parse_weights(weights_string.as_str())?;
 
     println!("Parsed Weights");
+
+    for player in players.iter_mut() {
+        let _ = player.calculate_score(&weights);
+        println!("{}", player)
+    }
 
     Ok(())
 }
