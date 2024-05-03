@@ -6,7 +6,7 @@ use std::{error::Error, fs::File};
 mod attribute;
 pub mod player;
 
-pub fn parse_csv(csv_file: File) -> Result<Vec<Player>, Box<dyn Error>> {
+pub fn parse_csv(csv_file: File, weights: &Vec<Attribute>) -> Result<Vec<Player>, Box<dyn Error>> {
     let mut rdr = csv::Reader::from_reader(csv_file);
     let headers = { rdr.headers()?.clone() };
 
@@ -16,7 +16,7 @@ pub fn parse_csv(csv_file: File) -> Result<Vec<Player>, Box<dyn Error>> {
 
     let players = result_records
         .iter()
-        .map(|record| Player::from_string_record(record, &headers))
+        .map(|record| Player::from_string_record(record, &headers, &weights))
         .collect::<Result<Vec<Player>, PlayerError>>()?;
 
     Ok(players)

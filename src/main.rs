@@ -28,19 +28,18 @@ fn main() {
 }
 
 fn app(args: Args) -> Result<(), Box<dyn Error>> {
-    let current_squad_file = File::open(args.current_squad_file_path)?;
-
-    let mut players = parse_csv(current_squad_file)?;
-
-    println!("Parsed Players");
-
     let weights_string = read_to_string(Path::new("./weights/advanced_forward.json"))?;
     let weights = parse_weights(weights_string.as_str())?;
 
-    println!("Parsed Weights");
+    println!("Prased Weights");
+
+    let current_squad_file = File::open(args.current_squad_file_path)?;
+
+    let mut players = parse_csv(current_squad_file, &weights)?;
+
+    println!("Parsed Players");
 
     for player in players.iter_mut() {
-        let _ = player.calculate_score(&weights);
         println!("{}", player)
     }
 

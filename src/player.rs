@@ -17,34 +17,14 @@ pub struct Player {
     position: String,
     age: u8,
     pub attributes: Vec<Attribute>,
-    pub score: Option<u64>,
+    pub score: u64,
 }
 
 impl Player {
-    pub fn calculate_score(&mut self, weights: &Vec<Attribute>) -> u64 {
-        let score = self
-            .attributes
-            .iter()
-            .map(|attr| {
-                let attr_val: u64 = attr.get_value().to_owned().into();
-                let weight_val: u64 = weights.iter().fold(0, |_, weight| {
-                    if discriminant(attr) == discriminant(weight) {
-                        weight.get_value().to_owned().into()
-                    } else {
-                        0
-                    }
-                });
-                attr_val * weight_val
-            })
-            .sum();
-
-        self.score = Some(score);
-        score
-    }
-
     pub fn from_string_record(
         player_record: &StringRecord,
         headers: &StringRecord,
+        weights: &Vec<Attribute>,
     ) -> Result<Player, PlayerError> {
         let mut name = String::new();
         let mut info = None;
@@ -71,23 +51,41 @@ impl Player {
             }
         }
 
+        let score = calculate_score(&attributes, weights);
+
         Ok(Player {
             name,
             info,
             position,
             age,
             attributes,
-            score: None,
+            score: score,
         })
     }
 }
 
+fn calculate_score(attributes: &Vec<Attribute>, weights: &Vec<Attribute>) -> u64 {
+    let score = attributes
+        .iter()
+        .map(|attr| {
+            let attr_val: u64 = attr.get_value().to_owned().into();
+            let weight_val: u64 = weights.iter().fold(0, |_, weight| {
+                if discriminant(attr) == discriminant(weight) {
+                    weight.get_value().to_owned().into()
+                } else {
+                    0
+                }
+            });
+            attr_val * weight_val
+        })
+        .sum();
+
+    score
+}
+
 impl Display for Player {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self.score {
-            Some(score_value) => writeln!(f, "Player: {}, Score: {}", self.name, score_value),
-            None => writeln!(f, "Player: {} has no score calculated", self.name),
-        }
+        writeln!(f, "Player: {}, Score: {}", self.name, self.score)
     }
 }
 
@@ -121,7 +119,7 @@ impl Error for PlayerError {
 
 #[cfg(test)]
 mod tests {
-    use crate::{attribute::Attribute, player::Player};
+    use crate::{attribute::Attribute, player::calculate_score, player::Player};
 
     #[test]
     fn calculate_score_sums_correctly() {
@@ -131,14 +129,13 @@ mod tests {
             position: String::new(),
             age: 0,
             attributes: vec![Attribute::Heading(10)],
-            score: None,
+            score: 0,
         };
 
         let weights = vec![Attribute::Heading(10)];
 
-        let result = player.calculate_score(&weights);
+        let result = calculate_score(&player.attributes, &weights);
         assert_eq!(result, 100);
-        assert_eq!(player.score, Some(100))
     }
 
     #[test]
@@ -149,14 +146,13 @@ mod tests {
             position: String::new(),
             age: 0,
             attributes: vec![Attribute::Heading(10)],
-            score: None,
+            score: 0,
         };
 
         let weights = vec![Attribute::Finishing(10)];
 
-        let result = player.calculate_score(&weights);
+        let result = calculate_score(&player.attributes, &weights);
         assert_eq!(result, 0);
-        assert_eq!(player.score, Some(0))
     }
 
     #[test]
@@ -167,13 +163,12 @@ mod tests {
             position: String::new(),
             age: 0,
             attributes: vec![Attribute::Heading(10)],
-            score: None,
+            score: 0,
         };
 
         let weights = Vec::new();
 
-        let result = player.calculate_score(&weights);
+        let result = calculate_score(&player.attributes, &weights);
         assert_eq!(result, 0);
-        assert_eq!(player.score, Some(0))
     }
 }
