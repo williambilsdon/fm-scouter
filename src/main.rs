@@ -5,10 +5,7 @@ use std::{
 };
 
 use clap::Parser;
-use fm_scouter::{
-    parse_csv, parse_weights,
-    player::{self, Player},
-};
+use fm_scouter::{parse_csv, parse_weights};
 
 #[derive(Parser, Debug)]
 #[command(version, about)]

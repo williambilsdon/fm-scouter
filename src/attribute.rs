@@ -1,5 +1,8 @@
 use serde::{de::Visitor, Deserialize, Deserializer};
 
+pub type Attributes = Vec<Attribute>;
+pub type Weights = Vec<Attribute>;
+
 #[derive(Debug, Deserialize)]
 pub enum Attribute {
     Workrate(u8),
@@ -161,7 +164,7 @@ impl Attribute {
 // TODO: This is an annoying wrapper struct I seem to need in order to deserialise the weights properly
 // Would be great to spend more time to get rid of this but for now will just carry on.
 #[derive(Debug, Deserialize)]
-pub struct Weights {
+pub struct WeightWrapper {
     #[serde(deserialize_with = "deserialise_attr_vec")]
     pub weights: Vec<Attribute>,
 }

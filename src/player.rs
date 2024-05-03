@@ -1,5 +1,4 @@
 use std::{
-    any::Any,
     error::Error,
     fmt::{Debug, Display},
     mem::discriminant,
@@ -8,7 +7,7 @@ use std::{
 
 use csv::StringRecord;
 
-use crate::attribute::Attribute;
+use crate::attribute::{Attribute, Attributes, Weights};
 
 #[derive(Debug)]
 pub struct Player {
@@ -16,7 +15,7 @@ pub struct Player {
     info: Option<String>,
     position: String,
     age: u8,
-    pub attributes: Vec<Attribute>,
+    pub attributes: Attributes,
     pub score: u64,
 }
 
@@ -30,7 +29,7 @@ impl Player {
         let mut info = None;
         let mut position = String::new();
         let mut age = 0;
-        let mut attributes = Vec::new();
+        let mut attributes: Attributes = Vec::new();
         for (idx, header) in headers.into_iter().enumerate() {
             let value = player_record.get(idx).ok_or(PlayerError::GetRecordValue)?;
             match header {
@@ -64,7 +63,7 @@ impl Player {
     }
 }
 
-fn calculate_score(attributes: &Vec<Attribute>, weights: &Vec<Attribute>) -> u64 {
+fn calculate_score(attributes: &Attributes, weights: &Weights) -> u64 {
     let score = attributes
         .iter()
         .map(|attr| {
