@@ -11,6 +11,7 @@ use fm_scouter::{parse_csv, parse_weights};
 #[command(version, about)]
 struct Args {
     current_squad_file_path: String,
+    scouted_players_file_path: String,
 }
 
 fn main() {
@@ -32,11 +33,19 @@ fn app(args: Args) -> Result<(), Box<dyn Error>> {
 
     let current_squad_file = File::open(args.current_squad_file_path)?;
 
-    let mut players = parse_csv(current_squad_file, &weights)?;
+    let current_players = parse_csv(current_squad_file, &weights)?;
 
     println!("Parsed Players");
 
-    for player in players.iter_mut() {
+    for player in current_players.iter() {
+        println!("{}", player)
+    }
+
+    let scouted_players_file = File::open(args.scouted_players_file_path)?;
+
+    let scouted_players = parse_csv(scouted_players_file, &weights)?;
+
+    for player in scouted_players.iter() {
         println!("{}", player)
     }
 

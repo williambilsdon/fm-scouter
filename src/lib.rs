@@ -19,7 +19,12 @@ pub fn parse_csv(csv_file: File, weights: &Weights) -> Result<Vec<Player>, Box<d
         .map(|record| Player::from_string_record(record, &headers, &weights))
         .collect::<Result<Vec<Player>, PlayerError>>()?;
 
-    Ok(players)
+    let filtered_players = players
+        .into_iter()
+        .filter(|player| !player.name.is_empty())
+        .collect();
+
+    Ok(filtered_players)
 }
 
 pub fn parse_weights(weight_file: &str) -> Result<Vec<Attribute>, Box<dyn Error>> {

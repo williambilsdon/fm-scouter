@@ -32,6 +32,9 @@ impl Player {
         let mut attributes: Attributes = Vec::new();
         for (idx, header) in headers.into_iter().enumerate() {
             let value = player_record.get(idx).ok_or(PlayerError::GetRecordValue)?;
+            if value == "- -" {
+                break;
+            }
             match header {
                 "Name" => name = value.to_string(),
                 "Inf" => info = Some(value.to_string()),
@@ -39,12 +42,37 @@ impl Player {
                 "Age" => {
                     age = value
                         .parse::<u8>()
-                        .map_err(|err| PlayerError::ParseIntError(err))?
+                        .map_err(|err| PlayerError::ParseIntError(err, value.to_string()))?
                 }
+                "Transfer Value" => continue,
+                "Club" => continue,
+                "Rec" => continue,
                 _ => {
-                    let value_u8: u8 = value
-                        .parse()
-                        .map_err(|err| PlayerError::ParseIntError(err))?;
+                    // We assume that all other fields are attributes, any fields that aren't attributes must be handled above.
+                    let value_u8: u8 = {
+                        if value.contains("-") {
+                            let split_range = value.split("-").collect::<Vec<&str>>();
+                            let results: Vec<u8> = split_range
+                                .into_iter()
+                                .map(|value| {
+                                    if value.is_empty() {
+                                        Ok(0)
+                                    } else {
+                                        value.parse::<u8>().map_err(|err| {
+                                            PlayerError::ParseIntError(err, value.to_string())
+                                        })
+                                    }
+                                })
+                                .collect::<Result<_, PlayerError>>()?;
+
+                            results.iter().sum()
+                        } else {
+                            value
+                                .parse()
+                                .map_err(|err| PlayerError::ParseIntError(err, value.to_string()))?
+                        }
+                    };
+
                     attributes.push(Attribute::from_key_value(header, value_u8))
                 }
             }
@@ -91,14 +119,21 @@ impl Display for Player {
 #[derive(Debug)]
 pub enum PlayerError {
     GetRecordValue,
-    ParseIntError(ParseIntError),
+    ParseIntError(ParseIntError, String),
 }
 
 impl Display for PlayerError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             PlayerError::GetRecordValue => write!(f, "Failed to get record value"),
-            PlayerError::ParseIntError(e) => write!(f, "Failed to parse int: {}", e.to_string()),
+            PlayerError::ParseIntError(e, s) => {
+                write!(
+                    f,
+                    "Failed to parse int: {}, With error: {}",
+                    s,
+                    e.to_string()
+                )
+            }
         }
     }
 }
@@ -107,7 +142,7 @@ impl Error for PlayerError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
             PlayerError::GetRecordValue => None,
-            PlayerError::ParseIntError(e) => Some(e),
+            PlayerError::ParseIntError(e, _) => Some(e),
         }
     }
 
