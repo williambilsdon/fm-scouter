@@ -56,21 +56,21 @@ pub fn parse(
     let attributes: Attributes = headers_str_values
         .into_iter()
         .filter(|(header, _)| match_headers(header))
-        .filter_map(|(header, value)| {
+        .map(|(header, value)| {
             let parsed_value = value
                 .parse::<u8>()
-                .map_err(|err| ParserError::ParseIntError(err)) // TODO: This result map is useless...
-                // While it simplifies our types I'd like to preserve this error as at this point we know the header
-                // should contain an attribute value and if it doesn't we don't want to parse the player at all
-                .ok();
+                .map_err(|err| ParserError::ParseIntError(err));
 
             match parsed_value {
-                Some(value) => Some((header, value)),
-                None => None,
+                Ok(value) => Ok((header, value)),
+                Err(err) => Err(err),
             }
         })
-        .map(|(header, value)| Attribute::from_key_value(header, value))
-        .collect();
+        .map(|result| match result {
+            Ok((header, value)) => Ok(Attribute::from_key_value(header, value)),
+            Err(err) => Err(err),
+        })
+        .collect::<Result<_, ParserError>>()?;
 
     let score = calculate_score(&attributes, weights);
     let player = Player {
