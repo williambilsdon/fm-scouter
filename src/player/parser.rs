@@ -57,30 +57,11 @@ pub fn parse(
         .into_iter()
         .filter(|(header, _)| match_headers(header))
         .map(|(header, value)| {
-            // TODO: Improve this part of the parsing, adding the checks for partial scouted stats makes this super messy right now
-            let parsed_value: Result<u8, ParserError> = if value.contains("-") {
-                if value == "-" {
-                    Ok(0)
-                } else {
-                    let split_value: Vec<&str> = value.split("-").collect();
-                    let parsed_values: Result<Vec<u8>, ParserError> = split_value
-                        .into_iter()
-                        .map(|val_str| {
-                            val_str
-                                .parse::<u8>()
-                                .map_err(|err| ParserError::ParseIntError(err))
-                        })
-                        .collect();
-
-                    match parsed_values {
-                        Ok(values) => Ok(values.into_iter().sum()),
-                        Err(err) => Err(err),
-                    }
-                }
-            } else {
-                value
+            let parsed_value: Result<u8, ParserError> = match value.contains("-") {
+                true => parse_masked_attribute(value),
+                false => value
                     .parse::<u8>()
-                    .map_err(|err| ParserError::ParseIntError(err))
+                    .map_err(|err| ParserError::ParseIntError(err)),
             };
 
             match parsed_value {
@@ -104,6 +85,27 @@ pub fn parse(
         score,
     };
     Ok(player)
+}
+
+fn parse_masked_attribute(value: &str) -> Result<u8, ParserError> {
+    if value == "-" {
+        return Ok(0);
+    }
+
+    let split_value: Vec<&str> = value.split("-").collect();
+    let parsed_values: Result<Vec<u8>, ParserError> = split_value
+        .into_iter()
+        .map(|val_str| {
+            val_str
+                .parse::<u8>()
+                .map_err(|err| ParserError::ParseIntError(err))
+        })
+        .collect();
+
+    match parsed_values {
+        Ok(values) => Ok(values.into_iter().sum()),
+        Err(err) => Err(err),
+    }
 }
 
 fn calculate_score(attributes: &Attributes, weights: &Weights) -> u64 {
