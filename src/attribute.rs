@@ -1,3 +1,5 @@
+use std::num::ParseIntError;
+
 use serde::{de::Visitor, Deserialize, Deserializer};
 
 pub type Attributes = Vec<Attribute>;
@@ -107,7 +109,6 @@ impl Attribute {
             _ => panic!("Key here should match: {}", key),
         }
     }
-
     pub fn get_value(&self) -> &u8 {
         match self {
             Attribute::Workrate(v) => v,
@@ -161,6 +162,58 @@ impl Attribute {
     }
 }
 
+pub fn match_headers(key: &str) -> bool {
+    match key {
+        "Wor" => true,
+        "Vis" => true,
+        "Thr" => true,
+        "Tec" => true,
+        "Tea" => true,
+        "Tck" => true,
+        "Str" => true,
+        "Sta" => true,
+        "TRO" => true,
+        "Ref" => true,
+        "Pun" => true,
+        "Pos" => true,
+        "Pen" => true,
+        "Pas" => true,
+        "Pac" => true,
+        "1v1" => true,
+        "OtB" => true,
+        "Nat" => true,
+        "Mar" => true,
+        "L Th" => true,
+        "Lon" => true,
+        "Ldr" => true,
+        "Kic" => true,
+        "Jum" => true,
+        "Hea" => true,
+        "Han" => true,
+        "Fre" => true,
+        "Fla" => true,
+        "Fir" => true,
+        "Fin" => true,
+        "Ecc" => true,
+        "Dri" => true,
+        "Det" => true,
+        "Dec" => true,
+        "Cro" => true,
+        "Cor" => true,
+        "Cnt" => true,
+        "Cmp" => true,
+        "Com" => true,
+        "Cmd" => true,
+        "Bra" => true,
+        "Bal" => true,
+        "Ant" => true,
+        "Agi" => true,
+        "Agg" => true,
+        "Aer" => true,
+        "Acc" => true,
+        _ => false,
+    }
+}
 // TODO: This is an annoying wrapper struct I seem to need in order to deserialise the weights properly
 // Would be great to spend more time to get rid of this but for now will just carry on.
 #[derive(Debug, Deserialize)]

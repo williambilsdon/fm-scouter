@@ -1,10 +1,11 @@
-use crate::player::{Player, PlayerError};
 use attribute::{Attribute, WeightWrapper, Weights};
 use csv::StringRecord;
+use player::parser::{parse, ParserError};
+use player::Player;
 use std::{error::Error, fs::File};
 
 mod attribute;
-pub mod player;
+mod player;
 
 pub fn parse_csv(csv_file: File, weights: &Weights) -> Result<Vec<Player>, Box<dyn Error>> {
     let mut rdr = csv::Reader::from_reader(csv_file);
@@ -16,8 +17,8 @@ pub fn parse_csv(csv_file: File, weights: &Weights) -> Result<Vec<Player>, Box<d
 
     let players = result_records
         .iter()
-        .map(|record| Player::from_string_record(record, &headers, &weights))
-        .collect::<Result<Vec<Player>, PlayerError>>()?;
+        .map(|record| parse(record, &headers, weights))
+        .collect::<Result<Vec<Player>, ParserError>>()?;
 
     let filtered_players = players
         .into_iter()

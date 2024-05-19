@@ -46,7 +46,7 @@ fn app(args: Args) -> Result<(), Box<dyn Error>> {
     let scouted_players = parse_csv(scouted_players_file, &weights)?;
 
     for player in scouted_players.iter() {
-        println!("{}", player)
+        println!("Player: {}", player)
     }
 
     Ok(())
