@@ -29,25 +29,23 @@ fn app(args: Args) -> Result<(), Box<dyn Error>> {
     let weights_string = read_to_string(Path::new("./weights/advanced_forward.json"))?;
     let weights = parse_weights(weights_string.as_str())?;
 
-    println!("Prased Weights");
-
     let current_squad_file = File::open(args.current_squad_file_path)?;
 
     let current_players = parse_csv(current_squad_file, &weights)?;
-
-    println!("Parsed Players");
-
-    for player in current_players.iter() {
-        println!("{}", player)
-    }
 
     let scouted_players_file = File::open(args.scouted_players_file_path)?;
 
     let scouted_players = parse_csv(scouted_players_file, &weights)?;
 
-    for player in scouted_players.iter() {
-        println!("Player: {}", player)
-    }
+    let mut all_players: Vec<_> = current_players
+        .iter()
+        .chain(scouted_players.iter())
+        .collect();
 
+    all_players.sort_by(|a, b| b.score.cmp(&a.score));
+
+    for player in all_players {
+        println!("{}", player)
+    }
     Ok(())
 }
