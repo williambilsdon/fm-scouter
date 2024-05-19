@@ -22,7 +22,7 @@ pub fn parse_csv(csv_file: File, weights: &Weights) -> Result<Vec<Player>, Box<d
 
     let filtered_players = players
         .into_iter()
-        .filter(|player| !player.name.is_empty())
+        .filter(|player| player.name != "- -")
         .collect();
 
     Ok(filtered_players)

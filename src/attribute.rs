@@ -1,5 +1,3 @@
-use std::num::ParseIntError;
-
 use serde::{de::Visitor, Deserialize, Deserializer};
 
 pub type Attributes = Vec<Attribute>;

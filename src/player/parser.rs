@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap, error::Error, fmt::Display, mem::discriminant, num::ParseIntError,
+    collections::HashMap, error::Error, fmt::Display, mem::discriminant, num::ParseIntError, vec,
 };
 
 use csv::StringRecord;
@@ -57,9 +57,31 @@ pub fn parse(
         .into_iter()
         .filter(|(header, _)| match_headers(header))
         .map(|(header, value)| {
-            let parsed_value = value
-                .parse::<u8>()
-                .map_err(|err| ParserError::ParseIntError(err));
+            // TODO: Improve this part of the parsing, adding the checks for partial scouted stats makes this super messy right now
+            let parsed_value: Result<u8, ParserError> = if value.contains("-") {
+                if value == "-" {
+                    Ok(0)
+                } else {
+                    let split_value: Vec<&str> = value.split("-").collect();
+                    let parsed_values: Result<Vec<u8>, ParserError> = split_value
+                        .into_iter()
+                        .map(|val_str| {
+                            val_str
+                                .parse::<u8>()
+                                .map_err(|err| ParserError::ParseIntError(err))
+                        })
+                        .collect();
+
+                    match parsed_values {
+                        Ok(values) => Ok(values.into_iter().sum()),
+                        Err(err) => Err(err),
+                    }
+                }
+            } else {
+                value
+                    .parse::<u8>()
+                    .map_err(|err| ParserError::ParseIntError(err))
+            };
 
             match parsed_value {
                 Ok(value) => Ok((header, value)),
@@ -81,7 +103,6 @@ pub fn parse(
         attributes,
         score,
     };
-    println!("Created Player: {:?}", player);
     Ok(player)
 }
 
@@ -107,7 +128,6 @@ fn calculate_score(attributes: &Attributes, weights: &Weights) -> u64 {
 #[derive(Debug)]
 pub enum ParserError {
     HeaderIndexError(String),
-    IdxNotFound(usize, String),
     ParseIntError(ParseIntError),
 }
 
@@ -127,11 +147,6 @@ impl Display for ParserError {
             ParserError::HeaderIndexError(header) => {
                 write!(f, "Failed to get index for header: {}", header)
             }
-            ParserError::IdxNotFound(idx, header) => write!(
-                f,
-                "Failed to find value at index: {} for header: {}",
-                idx, header
-            ),
             ParserError::ParseIntError(err) => write!(f, "Failed to parse Int with err: {}", err),
         }
     }
