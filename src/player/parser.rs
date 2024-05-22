@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap, error::Error, fmt::Display, mem::discriminant, num::ParseIntError, vec,
+    collections::HashMap, error::Error, fmt::Display, mem::discriminant, num::ParseIntError,
 };
 
 use csv::StringRecord;
@@ -21,13 +21,7 @@ pub fn parse(
 
     let headers_str_values = headers_idx
         .into_iter()
-        .filter_map(|(header, idx)| {
-            let str_value = player_record.get(idx);
-            match str_value {
-                Some(value) => Some((header, value)),
-                None => None,
-            }
-        })
+        .filter_map(|(header, idx)| player_record.get(idx).map(|value| (header, value)))
         .collect::<HashMap<&str, &str>>();
 
     let name = headers_str_values
@@ -51,28 +45,20 @@ pub fn parse(
         .get("Age")
         .ok_or_else(|| ParserError::HeaderIndexError("Age".to_string()))?
         .parse::<u8>()
-        .map_err(|err| ParserError::ParseIntError(err))?;
+        .map_err(ParserError::ParseIntError)?;
 
     let attributes: Attributes = headers_str_values
         .into_iter()
         .filter(|(header, _)| match_headers(header))
         .map(|(header, value)| {
-            let parsed_value: Result<u8, ParserError> = match value.contains("-") {
+            let parsed_value: Result<u8, ParserError> = match value.contains('-') {
                 true => parse_masked_attribute(value),
-                false => value
-                    .parse::<u8>()
-                    .map_err(|err| ParserError::ParseIntError(err)),
+                false => value.parse::<u8>().map_err(ParserError::ParseIntError),
             };
 
-            match parsed_value {
-                Ok(value) => Ok((header, value)),
-                Err(err) => Err(err),
-            }
+            parsed_value.map(|value| (header, value))
         })
-        .map(|result| match result {
-            Ok((header, value)) => Ok(Attribute::from_key_value(header, value)),
-            Err(err) => Err(err),
-        })
+        .map(|result| result.map(|(header, value)| Attribute::from_key_value(header, value)))
         .collect::<Result<_, ParserError>>()?;
 
     let score = calculate_score(&attributes, weights);
@@ -92,14 +78,10 @@ fn parse_masked_attribute(value: &str) -> Result<u8, ParserError> {
         return Ok(0);
     }
 
-    let split_value: Vec<&str> = value.split("-").collect();
+    let split_value: Vec<&str> = value.split('-').collect();
     let parsed_values: Result<Vec<u8>, ParserError> = split_value
         .into_iter()
-        .map(|val_str| {
-            val_str
-                .parse::<u8>()
-                .map_err(|err| ParserError::ParseIntError(err))
-        })
+        .map(|val_str| val_str.parse::<u8>().map_err(ParserError::ParseIntError))
         .collect();
 
     match parsed_values {

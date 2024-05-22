@@ -161,56 +161,56 @@ impl Attribute {
 }
 
 pub fn match_headers(key: &str) -> bool {
-    match key {
-        "Wor" => true,
-        "Vis" => true,
-        "Thr" => true,
-        "Tec" => true,
-        "Tea" => true,
-        "Tck" => true,
-        "Str" => true,
-        "Sta" => true,
-        "TRO" => true,
-        "Ref" => true,
-        "Pun" => true,
-        "Pos" => true,
-        "Pen" => true,
-        "Pas" => true,
-        "Pac" => true,
-        "1v1" => true,
-        "OtB" => true,
-        "Nat" => true,
-        "Mar" => true,
-        "L Th" => true,
-        "Lon" => true,
-        "Ldr" => true,
-        "Kic" => true,
-        "Jum" => true,
-        "Hea" => true,
-        "Han" => true,
-        "Fre" => true,
-        "Fla" => true,
-        "Fir" => true,
-        "Fin" => true,
-        "Ecc" => true,
-        "Dri" => true,
-        "Det" => true,
-        "Dec" => true,
-        "Cro" => true,
-        "Cor" => true,
-        "Cnt" => true,
-        "Cmp" => true,
-        "Com" => true,
-        "Cmd" => true,
-        "Bra" => true,
-        "Bal" => true,
-        "Ant" => true,
-        "Agi" => true,
-        "Agg" => true,
-        "Aer" => true,
-        "Acc" => true,
-        _ => false,
-    }
+    matches!(
+        key,
+        "Wor"
+            | "Vis"
+            | "Thr"
+            | "Tec"
+            | "Tea"
+            | "Tck"
+            | "Str"
+            | "Sta"
+            | "TRO"
+            | "Ref"
+            | "Pun"
+            | "Pos"
+            | "Pen"
+            | "Pas"
+            | "Pac"
+            | "1v1"
+            | "OtB"
+            | "Nat"
+            | "Mar"
+            | "L Th"
+            | "Lon"
+            | "Ldr"
+            | "Kic"
+            | "Jum"
+            | "Hea"
+            | "Han"
+            | "Fre"
+            | "Fla"
+            | "Fir"
+            | "Fin"
+            | "Ecc"
+            | "Dri"
+            | "Det"
+            | "Dec"
+            | "Cro"
+            | "Cor"
+            | "Cnt"
+            | "Cmp"
+            | "Com"
+            | "Cmd"
+            | "Bra"
+            | "Bal"
+            | "Ant"
+            | "Agi"
+            | "Agg"
+            | "Aer"
+            | "Acc"
+    )
 }
 // TODO: This is an annoying wrapper struct I seem to need in order to deserialise the weights properly
 // Would be great to spend more time to get rid of this but for now will just carry on.
